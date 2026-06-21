@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>星尘博客</title>
+    <style>
+* {margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft Yahei",sans-serif}
+body {background-color:var(--dark-bg);color:var(--dark-text);line-height:1.6}
+::-webkit-scrollbar {width:6px;height:6px}
+::-webkit-scrollbar-track {background-color:var(--dark-bg)}
+::-webkit-scrollbar-thumb {background-color:var(--accent-color);border-radius:3px}
+::-webkit-scrollbar-thumb:hover {background-color:color-mix(in srgb,var(--accent-color) 80%,var(--dark-text))}
+#page-header {position:sticky;top:0;z-index:999;backdrop-filter:blur(12px);background-color:color-mix(in srgb,var(--dark-card-bg) 75%,transparent);border-bottom:1px solid var(--dark-border)}
+#nav {padding:12px 24px;display:flex;align-items:center;justify-content:space-between}
+#menus {display:flex;gap:24px}
+.menus_item {list-style:none}
+.menus_item a {color:var(--dark-text);text-decoration:none;transition:color 0.3s ease}
+.menus_item a:hover {color:var(--nav-hover-color)}
+#content-inner {max-width:1400px;margin:24px auto;padding:0 24px;display:grid;grid-template-columns:3fr 1fr;gap:32px}
+.article-sort-item,.card-widget {border-radius:16px;border:1px solid transparent;background:linear-gradient(var(--dark-card-bg),var(--dark-card-bg)) padding-box,linear-gradient(135deg,var(--accent-color),color-mix(in srgb,var(--accent-color) 40%,transparent)) border-box;padding:20px;transition:all 0.3s ease;overflow:hidden}
+.article-sort-item:hover,.card-widget:hover {transform:translateY(-8px);box-shadow:0 12px 28px rgba(0,0,0,0.3)}
+.article-sort-item img {width:100%;height:220px;object-fit:cover;border-radius:8px;margin-bottom:16px}
+img {max-width:100%;height:auto;object-fit:cover;background-color:var(--dark-card-bg);border-radius:8px}
+img::after {content:attr(alt);display:block;padding:16px;text-align:center;color:var(--dark-text);background-color:var(--dark-card-bg)}
+.article-sort-item .excerpt {display:-webkit-box;-webkit-line-clamp:var(--article-excerpt-max-lines);-webkit-box-orient:vertical;overflow:hidden;text-overflow:ellipsis;margin:12px 0}
+#aside-content {display:flex;flex-direction:column;gap:24px}
+.card-widget .card-title {font-size:1.2rem;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid var(--dark-border)}
+@keyframes zoomIn {0%{opacity:0;transform:scale(0.9)}100%{opacity:1;transform:scale(1)}}
+.animate__zoomIn {animation:zoomIn 0.6s ease forwards}
+@media (max-width:1200px) {#content-inner{grid-template-columns:1fr}#aside-content{order:2}}
+@media (max-width:768px) {#menus{gap:12px;flex-wrap:wrap}#content-inner{padding:0 16px;gap:20px}.article-sort-item img{height:180px}}
+    </style>
+</head>
+<body>
+    <div id="web_bg"></div>
+    <header id="page-header">
+        <nav id="nav">
+            <div class="site-title">星尘博客</div>
+            <div id="menus" class="menus_items"></div>
+        </nav>
+    </header>
+    <div class="layout page">
+        <main id="content-inner" class="article-sort"></main>
+        <aside id="sidebar" class="aside-content"></aside>
+    </div>
+    <footer id="footer"></footer>
+    <div id="rightside"></div>
+</body>
+<script>
+<script>
+(function() {
+    // 下雨粒子动画
+    const webBg = document.getElementById('web_bg');
+    if (webBg) {
+        const canvas = document.createElement('canvas');
+        canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:-1';
+        webBg.appendChild(canvas);
+        const ctx = canvas.getContext('2d');
+        let w = window.innerWidth, h = window.innerHeight;
+        canvas.width = w; canvas.height = h;
+        const raindrops = [];
+        const rainCount = 50; // 密度降低50%
+
+        class Raindrop {
+            constructor() { this.reset() }
+            reset() {
+                this.x = Math.random() * w;
+                this.y = Math.random() * -h;
+                this.speed = 1 + Math.random() * 2; // 下落速度放缓
+                this.len = 8 + Math.random() * 12;
+                this.opacity = 0.2 + Math.random() * 0.3;
+            }
+            update() {
+                this.y += this.speed;
+                if (this.y > h) this.reset();
+                ctx.beginPath();
+                ctx.moveTo(this.x, this.y);
+                ctx.lineTo(this.x, this.y + this.len);
+                ctx.strokeStyle = `rgba(100,180,255,${this.opacity})`;
+                ctx.lineWidth = 1;
+                ctx.stroke();
+            }
+        }
+
+        for (let i = 0; i < rainCount; i++) raindrops.push(new Raindrop());
+        function animateRain() {
+            ctx.clearRect(0, 0, w, h);
+            raindrops.forEach(r => r.update());
+            requestAnimationFrame(animateRain);
+        }
+        animateRain();
+        window.addEventListener('resize', () => {
+            w = window.innerWidth; h = window.innerHeight;
+            canvas.width = w; canvas.height = h;
+        });
+    }
+
+    // 右侧工具栏：主题切换 + 回到顶部
+    const rightside = document.getElementById('rightside');
+    if (rightside) {
+        rightside.style.cssText = 'position:fixed;right:24px;bottom:24px;z-index:999';
+        // 主题切换按钮
+        const themeBtn = document.createElement('div');
+        themeBtn.style.cssText = 'width:40px;height:40px;border-radius:50%;background:var(--dark-card-bg);display:flex;align-items:center;justify-content:center;cursor:pointer;margin-bottom:12px;transition:all 0.3s ease';
+        themeBtn.textContent = '🌙';
+        rightside.appendChild(themeBtn);
+        let isDark = true;
+        themeBtn.addEventListener('click', () => {
+            isDark = !isDark;
+            if (isDark) {
+                document.body.style.setProperty('--dark-bg', '#121212');
+                document.body.style.setProperty('--dark-text', '#e0e0e0');
+                document.body.style.setProperty('--dark-card-bg', '#1e1e1e');
+                document.body.style.setProperty('--dark-border', '#333');
+                themeBtn.textContent = '🌙';
+            } else {
+                document.body.style.setProperty('--dark-bg', '#ffffff');
+                document.body.style.setProperty('--dark-text', '#333333');
+                document.body.style.setProperty('--dark-card-bg', '#f8f9fa');
+                document.body.style.setProperty('--dark-border', '#e9ecef');
+                themeBtn.textContent = '☀️';
+            }
+        });
+
+        // 回到顶部按钮
+        const backTop = document.createElement('div');
+        backTop.style.cssText = 'width:40px;height:40px;border-radius:50%;background:var(--dark-card-bg);display:none;align-items:center;justify-content:center;cursor:pointer;transition:all 0.3s ease;position:relative';
+        backTop.textContent = '↑';
+        const progress = document.createElement('div');
+        progress.style.cssText = 'position:absolute;inset:0;border-radius:50%;border:2px solid var(--accent-color);border-left-color:transparent;transition:transform 0.1s ease;pointer-events:none';
+        backTop.appendChild(progress);
+        rightside.appendChild(backTop);
+
+        window.addEventListener('scroll', () => {
+            const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+            const scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
+            const clientHeight = document.documentElement.clientHeight || window.innerHeight;
+            const percent = Math.min(100, (scrollTop / (scrollHeight - clientHeight)) * 100);
+            progress.style.transform = `rotate(${percent * 3.6}deg)`;
+            backTop.style.display = scrollTop > 300 ? 'flex' : 'none';
+        });
+
+        backTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    }
+
+    // 导航下拉菜单淡入淡出
+    const menus = document.getElementById('menus');
+    const nav = document.getElementById('nav');
+    if (menus && nav) {
+        menus.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+        if (window.innerWidth < 768) {
+            const toggle = document.createElement('div');
+            toggle.style.cssText = 'font-size:24px;cursor:pointer';
+            toggle.textContent = '☰';
+            nav.appendChild(toggle);
+            let open = false;
+            menus.style.opacity = '0';
+            menus.style.transform = 'translateY(-10px)';
+            menus.style.pointerEvents = 'none';
+            toggle.addEventListener('click', () => {
+                open = !open;
+                if (open) {
+                    menus.style.opacity = '1';
+                    menus.style.transform = 'translateY(0)';
+                    menus.style.pointerEvents = 'auto';
+                } else {
+                    menus.style.opacity = '0';
+                    menus.style.transform = 'translateY(-10px)';
+                    menus.style.pointerEvents = 'none';
+                }
+            });
+        }
+    }
+
+    // 卡片悬浮缩放动画
+    const contentInner = document.getElementById('content-inner');
+    if (contentInner) {
+        const cards = contentInner.querySelectorAll('.article-sort-item, .card-widget');
+        cards.forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateY(-8px) scale(1.02)';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+    }
+
+    // WOW动画初始化
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animate__zoomIn');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.wow').forEach(el => observer.observe(el));
+})();
+</script>
+</script>
+</html>
