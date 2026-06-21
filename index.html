@@ -1,203 +1,701 @@
 <!DOCTYPE html>
 <html lang="zh-CN" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>星尘博客</title>
-    <style>
-* {margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft Yahei",sans-serif}
-body {background-color:var(--dark-bg);color:var(--dark-text);line-height:1.6}
-::-webkit-scrollbar {width:6px;height:6px}
-::-webkit-scrollbar-track {background-color:var(--dark-bg)}
-::-webkit-scrollbar-thumb {background-color:var(--accent-color);border-radius:3px}
-::-webkit-scrollbar-thumb:hover {background-color:color-mix(in srgb,var(--accent-color) 80%,var(--dark-text))}
-#page-header {position:sticky;top:0;z-index:999;backdrop-filter:blur(12px);background-color:color-mix(in srgb,var(--dark-card-bg) 75%,transparent);border-bottom:1px solid var(--dark-border)}
-#nav {padding:12px 24px;display:flex;align-items:center;justify-content:space-between}
-#menus {display:flex;gap:24px}
-.menus_item {list-style:none}
-.menus_item a {color:var(--dark-text);text-decoration:none;transition:color 0.3s ease}
-.menus_item a:hover {color:var(--nav-hover-color)}
-#content-inner {max-width:1400px;margin:24px auto;padding:0 24px;display:grid;grid-template-columns:3fr 1fr;gap:32px}
-.article-sort-item,.card-widget {border-radius:16px;border:1px solid transparent;background:linear-gradient(var(--dark-card-bg),var(--dark-card-bg)) padding-box,linear-gradient(135deg,var(--accent-color),color-mix(in srgb,var(--accent-color) 40%,transparent)) border-box;padding:20px;transition:all 0.3s ease;overflow:hidden}
-.article-sort-item:hover,.card-widget:hover {transform:translateY(-8px);box-shadow:0 12px 28px rgba(0,0,0,0.3)}
-.article-sort-item img {width:100%;height:220px;object-fit:cover;border-radius:8px;margin-bottom:16px}
-img {max-width:100%;height:auto;object-fit:cover;background-color:var(--dark-card-bg);border-radius:8px}
-img::after {content:attr(alt);display:block;padding:16px;text-align:center;color:var(--dark-text);background-color:var(--dark-card-bg)}
-.article-sort-item .excerpt {display:-webkit-box;-webkit-line-clamp:var(--article-excerpt-max-lines);-webkit-box-orient:vertical;overflow:hidden;text-overflow:ellipsis;margin:12px 0}
-#aside-content {display:flex;flex-direction:column;gap:24px}
-.card-widget .card-title {font-size:1.2rem;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid var(--dark-border)}
-@keyframes zoomIn {0%{opacity:0;transform:scale(0.9)}100%{opacity:1;transform:scale(1)}}
-.animate__zoomIn {animation:zoomIn 0.6s ease forwards}
-@media (max-width:1200px) {#content-inner{grid-template-columns:1fr}#aside-content{order:2}}
-@media (max-width:768px) {#menus{gap:12px;flex-wrap:wrap}#content-inner{padding:0 16px;gap:20px}.article-sort-item img{height:180px}}
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- 解决百度图片防盗链403问题 -->
+<meta name="referrer" content="no-referrer">
+<title>星尘博客</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css">
+<style>
+:root {
+--global-bg: #0f172a;
+--card-bg: #1e293b;
+--font-color: #e2e8f0;
+--text-highlight-color: #f8fafc;
+--scrollbar-color: #38bdf8;
+--btn-bg: #38bdf8;
+--btn-hover-color: #a855f7;
+--card-box-shadow: 0 3px 8px 6px rgba(56,189,248,0.08);
+--card-hover-box-shadow: 0 8px 24px 8px rgba(168,85,247,0.15);
+--hr-border: #334155;
+--hr-before-color: #38bdf8;
+}
+html[data-theme="light"] {
+--global-bg: #f8fafc;
+--card-bg: #ffffff;
+--font-color: #334155;
+--text-highlight-color: #0f172a;
+--card-box-shadow: 0 3px 8px 6px rgba(0,0,0,0.05);
+--card-hover-box-shadow: 0 8px 24px 8px rgba(168,85,247,0.1);
+--hr-border: #e2e8f0;
+}
+* {
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+body {
+font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+background: var(--global-bg);
+color: var(--font-color);
+line-height: 1.6;
+}
+/* 全局图片统一自适应规则，适配所有尺寸二次元图 */
+img {
+max-width: 100%;
+height: auto;
+}
+/* 文章封面图：裁切填充不变形 */
+.article-card .cover {
+width: 100%;
+height: 200px;
+object-fit: cover;
+}
+/* 角落装饰小插画：完整显示不裁切 */
+.decor-anime {
+object-fit: contain;
+pointer-events: none;
+}
+/* 圆形头像专用适配 */
+.card-info .avatar {
+width: 80px;
+height: 80px;
+border-radius: 50%;
+display: block;
+margin: 0 auto 1rem;
+object-fit: cover;
+border: 3px solid var(--btn-bg);
+}
+/* 底层全屏雨景背景 */
+#web_bg {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+z-index: -1;
+background-image: url("https://img2.baidu.com/it/u=2065431873,414580333&fm=253&fmt=auto&app=138&f=JPEG?w=800&h=1062");
+background-size: cover;
+background-position: center;
+background-repeat: no-repeat;
+opacity: 0.35;
+}
+#page-header {
+height: 60px;
+display: flex;
+align-items: center;
+justify-content: space-between;
+padding: 0 2rem;
+background: var(--card-bg);
+box-shadow: var(--card-box-shadow);
+position: sticky;
+top: 0;
+z-index: 100;
+}
+#site-title {
+font-size: 1.5rem;
+color: var(--text-highlight-color);
+text-decoration: none;
+font-weight: bold;
+display: flex;
+align-items: center;
+gap: 0.6rem;
+}
+#site-title .anime-logo {
+width: 36px;
+height: 36px;
+border-radius: 50%;
+object-fit: cover;
+}
+#menus {
+display: flex;
+list-style: none;
+gap: 2rem;
+align-items: center;
+}
+#menus li {
+position: relative;
+}
+#menus li a {
+color: var(--font-color);
+text-decoration: none;
+display: flex;
+align-items: center;
+gap: 0.5rem;
+transition: color 0.3s;
+}
+#menus li a:hover {
+color: var(--btn-bg);
+}
+.submenu {
+position: absolute;
+top: 100%;
+left: 0;
+background: var(--card-bg);
+box-shadow: var(--card-box-shadow);
+padding: 0.5rem 0;
+min-width: 120px;
+display: none;
+border-radius: 6px;
+list-style: none;
+}
+#menus li:hover .submenu {
+display: block;
+}
+.submenu li {
+padding: 0.5rem 1rem;
+}
+#content-inner {
+max-width: 1200px;
+margin: 2rem auto;
+padding: 0 2rem;
+display: grid;
+grid-template-columns: 1fr 320px;
+gap: 2rem;
+}
+.article-card {
+background: var(--card-bg);
+border-radius: 12px;
+overflow: hidden;
+box-shadow: var(--card-box-shadow);
+transition: all 0.3s;
+margin-bottom: 2rem;
+position: relative;
+}
+.article-card .decor-anime {
+position: absolute;
+top: 8px;
+right: 8px;
+width: 60px;
+opacity: 0.2;
+}
+.article-card:hover {
+transform: translateY(-8px);
+box-shadow: var(--card-hover-box-shadow);
+}
+.article-card .content {
+padding: 1.5rem;
+}
+.article-card .title {
+font-size: 1.5rem;
+color: var(--text-highlight-color);
+text-decoration: none;
+font-weight: bold;
+display: block;
+margin-bottom: 0.5rem;
+}
+.article-card .date {
+color: var(--btn-bg);
+font-size: 0.9rem;
+margin-bottom: 1rem;
+display: block;
+}
+.sidebar-card {
+background: var(--card-bg);
+border-radius: 12px;
+padding: 1.5rem;
+box-shadow: var(--card-box-shadow);
+margin-bottom: 1.5rem;
+position: relative;
+overflow: hidden;
+}
+.sidebar-card::after {
+content: "";
+position: absolute;
+bottom: -40px;
+right: -30px;
+width: 140px;
+height: 140px;
+background-image: url("https://img0.baidu.com/it/u=3493585365,4076726888&fm=253&fmt=auto&app=138&f=JPEG?w=800&h=1422");
+background-size: contain;
+background-repeat: no-repeat;
+background-position: bottom right;
+opacity: 0.08;
+z-index: 0;
+pointer-events: none;
+}
+.card-title {
+font-size: 1.2rem;
+color: var(--text-highlight-color);
+margin-bottom: 1rem;
+padding-bottom: 0.5rem;
+border-bottom: 1px solid var(--hr-border);
+position: relative;
+z-index: 1;
+}
+.card-title::before {
+content: '';
+position: absolute;
+bottom: -1px;
+left: 0;
+width: 40px;
+height: 2px;
+background: var(--hr-before-color);
+}
+.card-search input {
+width: 100%;
+padding: 0.8rem 1rem;
+border-radius: 8px;
+border: none;
+background: var(--global-bg);
+color: var(--font-color);
+outline: none;
+position: relative;
+z-index: 1;
+}
+.card-info .name {
+text-align: center;
+font-size: 1.2rem;
+font-weight: bold;
+margin-bottom: 0.5rem;
+position: relative;
+z-index: 1;
+}
+.card-info .desc {
+text-align: center;
+opacity: 0.8;
+margin-bottom: 1rem;
+position: relative;
+z-index: 1;
+}
+.card-info .social {
+display: flex;
+justify-content: center;
+gap: 1rem;
+position: relative;
+z-index: 1;
+}
+.card-info .social a {
+color: var(--font-color);
+font-size: 1.5rem;
+transition: color 0.3s;
+}
+.card-info .social a:hover {
+color: var(--btn-bg);
+}
+.card-categories ul {
+list-style: none;
+position: relative;
+z-index: 1;
+}
+.card-categories ul li {
+display: flex;
+justify-content: space-between;
+padding: 0.5rem 0;
+border-bottom: 1px dashed var(--hr-border);
+}
+.card-categories ul li:last-child {
+border: none;
+}
+.card-tags .tags {
+display: flex;
+flex-wrap: wrap;
+gap: 0.5rem;
+position: relative;
+z-index: 1;
+}
+.card-tags .tags a {
+padding: 0.3rem 0.8rem;
+background: var(--global-bg);
+border-radius: 20px;
+color: var(--font-color);
+text-decoration: none;
+font-size: 0.9rem;
+transition: all 0.3s;
+}
+.card-tags .tags a:hover {
+background: var(--btn-bg);
+color: #fff;
+}
+.card-webinfo .metrics {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 1rem;
+position: relative;
+z-index: 1;
+}
+.metric {
+text-align: center;
+}
+.metric .name {
+font-size: 0.9rem;
+opacity: 0.8;
+}
+.metric .value {
+font-size: 1.2rem;
+color: var(--btn-bg);
+font-weight: bold;
+}
+#footer {
+background: var(--card-bg);
+padding: 2rem;
+text-align: center;
+margin-top: 3rem;
+line-height: 1.8;
+position: relative;
+}
+#footer .footer-anime-bg {
+position: absolute;
+width: 100%;
+height: 100%;
+left: 0;
+top: 0;
+background-image: url("https://img0.baidu.com/it/u=2369784609,1601133254&fm=253&app=138&f=JPEG?w=800&h=1431");
+background-repeat: repeat-x;
+background-size: auto 100%;
+background-position: bottom;
+opacity: 0.12;
+z-index: 0;
+pointer-events: none;
+}
+#footer > div {
+position: relative;
+z-index: 1;
+}
+#rightside {
+position: fixed;
+right: 2rem;
+bottom: 2rem;
+display: flex;
+flex-direction: column;
+gap: 1rem;
+z-index: 100;
+}
+#rightside button {
+width: 48px;
+height: 48px;
+border-radius: 50%;
+border: none;
+background: var(--btn-bg);
+color: #fff;
+font-size: 1.2rem;
+cursor: pointer;
+transition: all 0.3s;
+position: relative;
+overflow: hidden;
+}
+#rightside button:hover {
+background: var(--btn-hover-color);
+transform: scale(1.1);
+}
+::-webkit-scrollbar {
+width: 8px;
+height: 8px;
+}
+::-webkit-scrollbar-thumb {
+background: var(--scrollbar-color);
+border-radius: 4px;
+}
+@media (max-width: 900px) {
+#content-inner {
+grid-template-columns: 1fr;
+}
+#aside-content {
+display: none;
+}
+}
+@media (max-width: 768px) {
+#page-header {
+padding: 0 1rem;
+}
+#content-inner {
+padding: 0 1rem;
+}
+#rightside {
+right: 1rem;
+}
+#rightside button {
+width: 40px;
+height: 40px;
+}
+#menus {
+gap: 1rem;
+font-size: 0.9rem;
+}
+}
+</style>
 </head>
 <body>
-    <div id="web_bg"></div>
-    <header id="page-header">
-        <nav id="nav">
-            <div class="site-title">星尘博客</div>
-            <div id="menus" class="menus_items"></div>
-        </nav>
-    </header>
-    <div class="layout page">
-        <main id="content-inner" class="article-sort"></main>
-        <aside id="sidebar" class="aside-content"></aside>
-    </div>
-    <footer id="footer"></footer>
-    <div id="rightside"></div>
+<div id="web_bg"></div>
+
+<header id="page-header">
+<div id="blog-info">
+<a href="/" id="site-title">
+<img class="anime-logo" src="https://img0.baidu.com/it/u=1827695152,3820835663&fm=253&fmt=auto&app=120&f=JPEG?w=800&h=800" onerror="this.style.display='none'">
+星尘博客
+</a>
+</div>
+<nav id="nav">
+<ul id="menus">
+<li>
+<a href="/"><i class="fas fa-home"></i>首页</a>
+</li>
+<li>
+<a href="javascript:void(0)"><i class="fas fa-archive"></i>文章</a>
+<ul class="submenu">
+<li><a href="/archives/"><i class="fas fa-archive"></i>文章列表</a></li>
+<li><a href="/tags/"><i class="fas fa-tags"></i>标签</a></li>
+<li><a href="/categories/"><i class="fas fa-folder-open"></i>分类</a></li>
+</ul>
+</li>
+<li>
+<a href="/about/"><i class="fas fa-user"></i>关于我</a>
+</li>
+<li>
+<a href="/link/"><i class="fas fa-link"></i>友链</a>
+</li>
+<li>
+<a href="/tools/"><i class="fas fa-toolbox"></i>资源工具</a>
+</li>
+</ul>
+</nav>
+</header>
+
+<main id="content-inner">
+<div class="main-content">
+<!-- 文章卡片1 -->
+<article class="article-card wow animate__zoomIn">
+<img class="cover" src="https://img1.baidu.com/it/u=2694452853,1336772717&fm=253&app=138&f=JPEG?w=800&h=1062" alt="技术随笔" onerror="this.onerror=null;this.src=''">
+<img class="decor-anime" src="https://img0.baidu.com/it/u=3602784706,1995609231&fm=253&fmt=auto&app=138&f=JPEG?w=729&h=1458" onerror="this.style.display='none'">
+<div class="content">
+<a href="#tech-notes" class="title">技术随笔</a>
+<span class="date"><i class="fas fa-calendar-alt"></i> 2024-01-15</span>
+<p class="summary">深耕前端开发、原生JS、React框架、数据可视化与全栈部署实战...</p>
+</div>
+</article>
+
+<!-- 文章卡片2 -->
+<article class="article-card wow animate__zoomIn">
+<img class="cover" src="https://img2.baidu.com/it/u=2369784609,1601133254&fm=253&app=138&f=JPEG?w=800&h=1431" alt="学习归档" onerror="this.onerror=null;this.src=''">
+<img class="decor-anime" src="https://img0.baidu.com/it/u=2065431873,414580333&fm=253&fmt=auto&app=138&f=JPEG?w=800&h=1062" onerror="this.style.display='none'">
+<div class="content">
+<a href="#learning" class="title">学习归档</a>
+<span class="date"><i class="fas fa-calendar-alt"></i> 2024-02-20</span>
+<p class="summary">从零梳理计算机基础知识、网络原理、数据库SQL...</p>
+</div>
+</article>
+
+<!-- 文章卡片3 -->
+<article class="article-card wow animate__zoomIn">
+<img class="cover" src="https://img0.baidu.com/it/u=3602784706,1995609231&fm=253&fmt=auto&app=138&f=JPEG?w=729&h=1458" alt="项目作品" onerror="this.onerror=null;this.src=''">
+<img class="decor-anime" src="https://img1.baidu.com/it/u=2694452853,1336772717&fm=253&app=138&f=JPEG?w=800&h=1062" onerror="this.style.display='none'">
+<div class="content">
+<a href="#projects" class="title">项目作品</a>
+<span class="date"><i class="fas fa-calendar-alt"></i> 2024-03-10</span>
+<p class="summary">收录个人独立开发的完整项目：前端官网复刻、可视化大屏...</p>
+</div>
+</article>
+
+<!-- 文章卡片4 -->
+<article class="article-card wow animate__zoomIn">
+<img class="cover" src="https://img0.baidu.com/it/u=3493585365,4076726888&fm=253&fmt=auto&app=138&f=JPEG?w=800&h=1422" alt="数据思维" onerror="this.onerror=null;this.src=''">
+<img class="decor-anime" src="https://img0.baidu.com/it/u=1827695152,3820835663&fm=253&fmt=auto&app=120&f=JPEG?w=800&h=800" onerror="this.style.display='none'">
+<div class="content">
+<a href="#data-thinking" class="title">数据思维</a>
+<span class="date"><i class="fas fa-calendar-alt"></i> 2024-04-05</span>
+<p class="summary">专注数据清洗、台账分析、四象限建模、大数据处理...</p>
+</div>
+</article>
+
+<!-- 文章卡片5 -->
+<article class="article-card wow animate__zoomIn">
+<img class="cover" src="https://img0.baidu.com/it/u=1827695152,3820835663&fm=253&fmt=auto&app=120&f=JPEG?w=800&h=800" alt="资源工具箱" onerror="this.onerror=null;this.src=''">
+<img class="decor-anime" src="https://img0.baidu.com/it/u=2369784609,1601133254&fm=253&app=138&f=JPEG?w=800&h=1431" onerror="this.style.display='none'">
+<div class="content">
+<a href="#tools" class="title">资源工具箱</a>
+<span class="date"><i class="fas fa-calendar-alt"></i> 2024-05-12</span>
+<p class="summary">整理全网优质免费开发资源、前端模板、调试工具...</p>
+</div>
+</article>
+
+<!-- 文章卡片6 -->
+<article class="article-card wow animate__zoomIn">
+<img class="cover" src="https://img0.baidu.com/it/u=2065431873,414580333&fm=253&fmt=auto&app=138&f=JPEG?w=800&h=1062" alt="关于本站" onerror="this.onerror=null;this.src=''">
+<img class="decor-anime" src="https://img0.baidu.com/it/u=3493585365,4076726888&fm=253&fmt=auto&app=138&f=JPEG?w=800&h=1422" onerror="this.style.display='none'">
+<div class="content">
+<a href="#about" class="title">关于本站</a>
+<span class="date"><i class="fas fa-calendar-alt"></i> 2024-06-01</span>
+<p class="summary">电子信息工程应届开发者，深耕前端全栈、嵌入式硬件...</p>
+</div>
+</article>
+</div>
+
+<aside id="aside-content">
+<div id="sidebar">
+<div class="sidebar-card card-search">
+<h3 class="card-title"><i class="fas fa-search"></i> 全站搜索</h3>
+<input type="text" placeholder="输入关键词搜索文章...">
+</div>
+
+<div class="sidebar-card card-info">
+<img src="https://img0.baidu.com/it/u=1827695152,3820835663&fm=253&fmt=auto&app=120&f=JPEG?w=800&h=800" alt="星尘" onerror="this.style.display='none'" class="avatar">
+<div class="name">星尘</div>
+<div class="desc">持续迭代的开发者，终身学习</div>
+<div class="social">
+<a href="https://github.com/stardust" target="_blank" title="GitHub"><i class="fab fa-github"></i></a>
+<a href="mailto:stardust@example.com" title="Email"><i class="fas fa-envelope"></i></a>
+</div>
+</div>
+
+<div class="sidebar-card card-announcement">
+<h3 class="card-title"><i class="fas fa-bullhorn"></i> 公告</h3>
+<div class="content">欢迎来到星尘博客，记录技术成长之路</div>
+</div>
+
+<div class="sidebar-card card-recent-post">
+<h3 class="card-title"><i class="fas fa-history"></i> 最新文章</h3>
+<ul>
+<li><a href="#tech-notes">技术随笔</a><span class="date">2024-01-15</span></li>
+<li><a href="#learning">学习归档</a><span class="date">2024-02-20</span></li>
+<li><a href="#projects">项目作品</a><span class="date">2024-03-10</span></li>
+</ul>
+</div>
+
+<div class="sidebar-card card-categories">
+<h3 class="card-title"><i class="fas fa-folder-open"></i> 分类</h3>
+<ul>
+<li><span>技术随笔</span><span>6</span></li>
+<li><span>学习归档</span><span>4</span></li>
+<li><span>项目作品</span><span>3</span></li>
+<li><span>数据思维</span><span>2</span></li>
+<li><span>资源工具</span><span>5</span></li>
+</ul>
+</div>
+
+<div class="sidebar-card card-tags">
+<h3 class="card-title"><i class="fas fa-tags"></i> 标签云</h3>
+<div class="tags">
+<a href="#">前端</a>
+<a href="#">React</a>
+<a href="#">Python</a>
+<a href="#">嵌入式</a>
+<a href="#">数据可视化</a>
+<a href="#">SQL</a>
+<a href="#">Hexo</a>
+<a href="#">Tailwind</a>
+</div>
+</div>
+
+<div class="sidebar-card card-webinfo">
+<h3 class="card-title"><i class="fas fa-chart-line"></i> 站点资讯</h3>
+<div class="metrics">
+<div class="metric">
+<div class="name">文章总数</div>
+<div class="value">6</div>
+</div>
+<div class="metric">
+<div class="name">总访问</div>
+<div class="value">加载中</div>
+</div>
+<div class="metric">
+<div class="name">访客</div>
+<div class="value">加载中</div>
+</div>
+<div class="metric">
+<div class="name">更新日期</div>
+<div class="value">2024-06-20</div>
+</div>
+</div>
+</div>
+</div>
+</aside>
+</main>
+
+<footer id="footer">
+<div class="footer-anime-bg"></div>
+<div>
+<p>© 2026 星尘博客 | 框架 Hexo | 暗色二次元主题</p>
+<p>二次元插画：赛博雨夜/星空少女系列</p>
+</div>
+</footer>
+
+<div id="rightside">
+<button title="切换明暗主题"><i class="fas fa-moon"></i></button>
+<button title="回到顶部"><i class="fas fa-arrow-up"></i></button>
+</div>
+
+<script>
+// 下雨粒子画布动画
+const canvas = document.getElementById("web_bg");
+const ctx = canvas.getContext("2d");
+function resizeCanvas(){
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener("resize", resizeCanvas);
+let rainList = [];
+class RainDrop{
+constructor(){
+this.x = Math.random() * canvas.width;
+this.y = Math.random() * -canvas.height;
+this.len = Math.random() * 12 + 6;
+this.speed = Math.random() * 4 + 2;
+this.color = Math.random()>0.5 ? "#38bdf8" : "#a855f7";
+}
+update(){
+this.y += this.speed;
+if(this.y > canvas.height){
+this.y = Math.random()*-canvas.height;
+this.x = Math.random()*canvas.width;
+}
+}
+draw(){
+ctx.beginPath();
+ctx.moveTo(this.x, this.y);
+ctx.lineTo(this.x, this.y+this.len);
+ctx.strokeStyle = this.color;
+ctx.lineWidth = 1.2;
+ctx.stroke();
+}
+}
+function createRain(count=120){
+for(let i=0;i<count;i++) rainList.push(new RainDrop());
+}
+createRain();
+function animateRain(){
+ctx.clearRect(0,0,canvas.width,canvas.height);
+rainList.forEach(drop=>{
+drop.update();
+drop.draw();
+})
+requestAnimationFrame(animateRain);
+}
+animateRain();
+
+// 明暗主题切换
+const themeBtn = document.querySelector("#rightside button:first-child");
+const htmlRoot = document.documentElement;
+themeBtn.addEventListener("click",()=>{
+if(htmlRoot.dataset.theme === "dark"){
+htmlRoot.dataset.theme = "light";
+themeBtn.innerHTML = '<i class="fas fa-sun"></i>';
+}else{
+htmlRoot.dataset.theme = "dark";
+themeBtn.innerHTML = '<i class="fas fa-moon"></i>';
+}
+})
+
+// 回到顶部
+const topBtn = document.querySelector("#rightside button:last-child");
+window.addEventListener("scroll",()=>{
+let scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+if(scrollTop > 300) topBtn.style.opacity = "1";
+else topBtn.style.opacity = "0";
+})
+topBtn.style.opacity = "0";
+topBtn.addEventListener("click",()=>{
+window.scrollTo({top:0,behavior:"smooth"})
+})
+
+// 卡片入场动画
+new IntersectionObserver((entries)=>{
+entries.forEach(item=>{
+if(item.isIntersecting) item.target.classList.add("animate__zoomIn");
+})
+},{threshold:0.1}).observe(document.querySelectorAll(".article-card"))
+</script>
 </body>
-<script>
-<script>
-(function() {
-    // 下雨粒子动画
-    const webBg = document.getElementById('web_bg');
-    if (webBg) {
-        const canvas = document.createElement('canvas');
-        canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:-1';
-        webBg.appendChild(canvas);
-        const ctx = canvas.getContext('2d');
-        let w = window.innerWidth, h = window.innerHeight;
-        canvas.width = w; canvas.height = h;
-        const raindrops = [];
-        const rainCount = 50; // 密度降低50%
-
-        class Raindrop {
-            constructor() { this.reset() }
-            reset() {
-                this.x = Math.random() * w;
-                this.y = Math.random() * -h;
-                this.speed = 1 + Math.random() * 2; // 下落速度放缓
-                this.len = 8 + Math.random() * 12;
-                this.opacity = 0.2 + Math.random() * 0.3;
-            }
-            update() {
-                this.y += this.speed;
-                if (this.y > h) this.reset();
-                ctx.beginPath();
-                ctx.moveTo(this.x, this.y);
-                ctx.lineTo(this.x, this.y + this.len);
-                ctx.strokeStyle = `rgba(100,180,255,${this.opacity})`;
-                ctx.lineWidth = 1;
-                ctx.stroke();
-            }
-        }
-
-        for (let i = 0; i < rainCount; i++) raindrops.push(new Raindrop());
-        function animateRain() {
-            ctx.clearRect(0, 0, w, h);
-            raindrops.forEach(r => r.update());
-            requestAnimationFrame(animateRain);
-        }
-        animateRain();
-        window.addEventListener('resize', () => {
-            w = window.innerWidth; h = window.innerHeight;
-            canvas.width = w; canvas.height = h;
-        });
-    }
-
-    // 右侧工具栏：主题切换 + 回到顶部
-    const rightside = document.getElementById('rightside');
-    if (rightside) {
-        rightside.style.cssText = 'position:fixed;right:24px;bottom:24px;z-index:999';
-        // 主题切换按钮
-        const themeBtn = document.createElement('div');
-        themeBtn.style.cssText = 'width:40px;height:40px;border-radius:50%;background:var(--dark-card-bg);display:flex;align-items:center;justify-content:center;cursor:pointer;margin-bottom:12px;transition:all 0.3s ease';
-        themeBtn.textContent = '🌙';
-        rightside.appendChild(themeBtn);
-        let isDark = true;
-        themeBtn.addEventListener('click', () => {
-            isDark = !isDark;
-            if (isDark) {
-                document.body.style.setProperty('--dark-bg', '#121212');
-                document.body.style.setProperty('--dark-text', '#e0e0e0');
-                document.body.style.setProperty('--dark-card-bg', '#1e1e1e');
-                document.body.style.setProperty('--dark-border', '#333');
-                themeBtn.textContent = '🌙';
-            } else {
-                document.body.style.setProperty('--dark-bg', '#ffffff');
-                document.body.style.setProperty('--dark-text', '#333333');
-                document.body.style.setProperty('--dark-card-bg', '#f8f9fa');
-                document.body.style.setProperty('--dark-border', '#e9ecef');
-                themeBtn.textContent = '☀️';
-            }
-        });
-
-        // 回到顶部按钮
-        const backTop = document.createElement('div');
-        backTop.style.cssText = 'width:40px;height:40px;border-radius:50%;background:var(--dark-card-bg);display:none;align-items:center;justify-content:center;cursor:pointer;transition:all 0.3s ease;position:relative';
-        backTop.textContent = '↑';
-        const progress = document.createElement('div');
-        progress.style.cssText = 'position:absolute;inset:0;border-radius:50%;border:2px solid var(--accent-color);border-left-color:transparent;transition:transform 0.1s ease;pointer-events:none';
-        backTop.appendChild(progress);
-        rightside.appendChild(backTop);
-
-        window.addEventListener('scroll', () => {
-            const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
-            const scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
-            const clientHeight = document.documentElement.clientHeight || window.innerHeight;
-            const percent = Math.min(100, (scrollTop / (scrollHeight - clientHeight)) * 100);
-            progress.style.transform = `rotate(${percent * 3.6}deg)`;
-            backTop.style.display = scrollTop > 300 ? 'flex' : 'none';
-        });
-
-        backTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
-    }
-
-    // 导航下拉菜单淡入淡出
-    const menus = document.getElementById('menus');
-    const nav = document.getElementById('nav');
-    if (menus && nav) {
-        menus.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-        if (window.innerWidth < 768) {
-            const toggle = document.createElement('div');
-            toggle.style.cssText = 'font-size:24px;cursor:pointer';
-            toggle.textContent = '☰';
-            nav.appendChild(toggle);
-            let open = false;
-            menus.style.opacity = '0';
-            menus.style.transform = 'translateY(-10px)';
-            menus.style.pointerEvents = 'none';
-            toggle.addEventListener('click', () => {
-                open = !open;
-                if (open) {
-                    menus.style.opacity = '1';
-                    menus.style.transform = 'translateY(0)';
-                    menus.style.pointerEvents = 'auto';
-                } else {
-                    menus.style.opacity = '0';
-                    menus.style.transform = 'translateY(-10px)';
-                    menus.style.pointerEvents = 'none';
-                }
-            });
-        }
-    }
-
-    // 卡片悬浮缩放动画
-    const contentInner = document.getElementById('content-inner');
-    if (contentInner) {
-        const cards = contentInner.querySelectorAll('.article-sort-item, .card-widget');
-        cards.forEach(card => {
-            card.addEventListener('mouseenter', () => {
-                card.style.transform = 'translateY(-8px) scale(1.02)';
-            });
-            card.addEventListener('mouseleave', () => {
-                card.style.transform = 'translateY(0) scale(1)';
-            });
-        });
-    }
-
-    // WOW动画初始化
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('animate__zoomIn');
-                observer.unobserve(entry.target);
-            }
-        });
-    }, { threshold: 0.1 });
-    document.querySelectorAll('.wow').forEach(el => observer.observe(el));
-})();
-</script>
-</script>
-</html>
+    </html>
